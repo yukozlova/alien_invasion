@@ -1,6 +1,7 @@
 import pygame
 import sys
 from cat import Cat
+from random import randint
 
 class BlueScreen:
     def __init__(self):
@@ -16,6 +17,8 @@ class BlueScreen:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                self.bg_color = (randint(1, 255), randint(1, 255), randint(1, 255))
     
     def _update_screen(self):
         self.screen.fill(self.bg_color)
