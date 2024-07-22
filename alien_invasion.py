@@ -25,7 +25,6 @@ class AlienInvasion():
         alien_height = alien.rect.height
         current_y = alien_height
         half_screen_height = self.settings.screen_height / 2
-        print(f"current_y = {current_y}, half = {half_screen_height}")
 
         while current_y <= half_screen_height:
             current_x = alien_width
