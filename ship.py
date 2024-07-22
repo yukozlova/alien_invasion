@@ -24,11 +24,15 @@ class Ship:
         elif self.moving_left and self.rect.left > self.screen_rect.left:
             self.x -= self.settings.ship_speed
     
-        self.rect.x = self.x
+        self.rect.x = float(self.x)
 
         if self.moving_top and self.rect.top > self.screen_rect.top:
             self.y -= self.settings.ship_speed
         elif self.moving_bottom and self.rect.bottom < self.screen_rect.bottom:
             self.y += self.settings.ship_speed
         
-        self.rect.y = self.y
+        self.rect.y = float(self.y)
+    
+    def center_ship(self):
+        self.rect.midbottom = self.screen_rect.midbottom
+        self.x = float(self.rect.x)
