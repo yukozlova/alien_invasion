@@ -7,6 +7,8 @@ from alien import Alien
 from game_stats import GameStats
 from time import sleep
 from button import Button
+from scoreboard import ScoreBoard
+from pathlib import Path
 
 class AlienInvasion():
     def __init__(self):
@@ -19,6 +21,7 @@ class AlienInvasion():
         self.screen_rect = self.screen.get_rect()
         pygame.display.set_caption('Alien Invasion')
         self.stats = GameStats(self)
+        self.sb = ScoreBoard(self)
         self.play_button = Button(self, 'Play')
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -57,7 +60,7 @@ class AlienInvasion():
         elif event.key == pygame.K_DOWN:
             self.ship.moving_bottom = True
         elif event.key == pygame.K_q:
-            sys.exit()
+            self._exit()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
         elif event.key == pygame.K_p:
@@ -87,13 +90,13 @@ class AlienInvasion():
             self._create_alien_fleet()
             self.ship.center_ship()
             pygame.mouse.set_visible(False)
+            self.sb.prep_score_imgs()
             self.settings.initialize_dynamic_settings()
     
     def _check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                self._exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
@@ -107,19 +110,6 @@ class AlienInvasion():
         if len(self.bullets) < self.settings.bullet_allowed:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
-            
-    def _update_screen(self):
-        self.screen.fill(self.settings.bg_color)
-        for bullet in self.bullets:
-            bullet.draw_bullet()
-
-        self.ship.blitme()
-        self.aliens.draw(self.screen)
-
-        if not self.game_active:
-            self.play_button.draw_button()
-
-        pygame.display.flip()
     
     def _update_bullets(self):
         self.bullets.update()
@@ -131,11 +121,17 @@ class AlienInvasion():
     def _check_bullet_alien_collisions(self):
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens,
                                                 False, True)
+        for alien in collisions.values():
+            self.stats.score += self.settings.alien_points * len(alien)
+            self.sb.prep_score()
+            self.sb.check_high_score()
 
         if not self.aliens:
             self.bullets.empty()
             self._create_alien_fleet()
             self.settings.increase_speed()
+            self.stats.level += 1
+            self.sb.prep_level()
 
     def _check_fleet_edges(self):
         for alien in self.aliens.sprites():
@@ -160,7 +156,16 @@ class AlienInvasion():
         if pygame.sprite.spritecollideany(self.ship, self.aliens):
             self._ship_hit()
         self._check_aliens_bottom()
+
+    def _exit(self):
+        pygame.quit()
+        self._save_high_score()
+        sys.exit()
     
+    def _save_high_score(self):
+        path = Path(self.settings.file_name)
+        path.write_text(str(self.stats.high_score))
+
     def _ship_hit(self):
         if self.stats.ships_left > 1:
             self.stats.ships_left -= 1
@@ -168,10 +173,26 @@ class AlienInvasion():
             self.bullets.empty()
             self._create_alien_fleet()
             self.ship.center_ship()
+            self.sb.prep_ships()
             sleep(1)
         else:
+            self._save_high_score()
             self.game_active = False
             pygame.mouse.set_visible(True)
+
+    def _update_screen(self):
+        self.screen.fill(self.settings.bg_color)
+        for bullet in self.bullets:
+            bullet.draw_bullet()
+
+        self.ship.blitme()
+        self.aliens.draw(self.screen)
+        self.sb.show_scoreboard()
+
+        if not self.game_active:
+            self.play_button.draw_button()
+        
+        pygame.display.flip()
 
     def run_game(self):
         while True:
