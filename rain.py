@@ -14,13 +14,12 @@ class Rain:
         self.screen_rect = self.screen.get_rect()
         pygame.display.set_caption('Rain')
         self.drops = pygame.sprite.Group()
+        self._create_drops()
 
-    def _create_a_drop(self, x_position=None):
-        new_drop = Drop(self)
-        if x_position:
-            new_drop.rect.x = x_position
-            new_drop.initial_x = x_position
-        self.drops.add(new_drop)
+    def _create_drops(self):
+        for i in range(self.settings.drop_num):
+            new_drop = Drop(self)
+            self.drops.add(new_drop)
 
     def _check_keydown_events(self, event):
         if event.key == pygame.K_q:
@@ -36,18 +35,14 @@ class Rain:
     def _update_drops(self):
         self.drops.update()
 
-        for drop in self.drops.copy():
+        for drop in self.drops:
             if drop.rect.top >= self.settings.screen_height:
-                self._create_a_drop(drop.initial_x)
-                self.drops.remove(drop)
-
-        if len(self.drops) < self.settings.drop_num:
-            self._create_a_drop()
+                drop.reset_drop()
 
         i = 0
         for drop in self.drops:
             if i % 4 == 0:
-                drop.speed += 0.003
+                drop.speed += 0.03
             if i % 6 == 0:
                 drop.speed += 0.075
             elif i % 10 == 0:
@@ -77,5 +72,4 @@ def print_info(game):
 
 if __name__ == '__main__':
     rain = Rain()
-    print_info(rain)
     rain.run_game()
