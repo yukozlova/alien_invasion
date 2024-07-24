@@ -41,13 +41,13 @@ class Rain:
 
         i = 0
         for drop in self.drops:
-            if i % 4 == 0:
+            if i % randint(1, 5) == 0:
                 drop.speed += 0.03
-            if i % 6 == 0:
+            if i % randint(1, 10) == 0:
                 drop.speed += 0.075
-            elif i % 10 == 0:
+            elif i % randint(10, 20) == 0:
                 drop.speed = 1.5
-            elif i % 20 == 0:
+            elif i % randint(20, 30) == 0:
                 drop.speed = 0.05
             i += 1
 
