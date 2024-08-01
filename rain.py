@@ -9,8 +9,11 @@ class Rain:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.settings = Settings()
-        self.screen = pygame.display.set_mode((self.settings.screen_width,
-                                               self.settings.screen_height))
+        # self.screen = pygame.display.set_mode((self.settings.screen_width,
+        #                                        self.settings.screen_height))
+        self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        self.settings.screen_width = self.screen.get_width()
+        self.settings.screen_height = self.screen.get_height()
         self.screen_rect = self.screen.get_rect()
         pygame.display.set_caption('Rain')
         self.drops = pygame.sprite.Group()
@@ -22,7 +25,8 @@ class Rain:
             self.drops.add(new_drop)
 
     def _check_keydown_events(self, event):
-        if event.key == pygame.K_q:
+        if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+            pygame.exit()
             sys.exit()
 
     def _check_events(self):
